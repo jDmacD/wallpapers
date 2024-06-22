@@ -29,6 +29,7 @@
         installPhase = ''
           mkdir -p $out/share/wallpapers
           cp -r $src/3440x1440/* $out/share/wallpapers/3440x1440/
+          chmod -R 777 $out/share/wallpapers/
           mkdir -p $out/bin
 
           cat > $out/bin/random-wallpaper <<EOF
