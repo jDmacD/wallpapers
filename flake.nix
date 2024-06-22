@@ -36,6 +36,9 @@
           find $out/share/wallpapers/3440x1440 -type f -name '*.jpeg' | shuf -n 1
           EOF
           chmod +x $out/bin/random-wallpaper
+
+          random_image=$(find $out/share/wallpapers/3440x1440 -type f -name '*.jpeg' | shuf -n 1)
+          echo $random_image > $out/share/wallpapers/random-image
         '';
 
         meta = with pkgs.lib; {
@@ -44,8 +47,8 @@
         };
       };
 
-      randomImage = pkgs.writeShellScriptBin "random-image" ''
-        find ${self.packages.${system}.wallpapers}/share/wallpapers/3440x1440 -type f -name "*.jpeg" | shuf -n 1
+      randomImage = pkgs.writeText "random-image-path" ''
+        ${builtins.readFile "${self.packages.${system}.wallpapers}/share/wallpapers/random-image"}
       '';
     });
 
@@ -76,7 +79,7 @@
     apps = forAllSystems (system: {
       randomImage = {
         type = "app";
-        program = "${self.packages.${system}.randomImage}/bin/random-image";
+        program = "${self.packages.${system}.randomImage}";
       };
     });
 
