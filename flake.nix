@@ -33,7 +33,7 @@
 
           cat > $out/bin/random-wallpaper <<EOF
           #!/usr/bin/env bash
-          find $out/share/wallpapers/3440x1440 -type f -name '*.jpg' | shuf -n 1
+          find $out/share/wallpapers/3440x1440 -type f -name '*.jpeg' | shuf -n 1
           EOF
           chmod +x $out/bin/random-wallpaper
         '';
