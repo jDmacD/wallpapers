@@ -28,62 +28,16 @@
 
         installPhase = ''
           mkdir -p $out/share/wallpapers
-          cp -r $src/3440x1440/* $out/share/wallpapers/3440x1440/
-          chmod -R 777 $out/share/wallpapers/
-          mkdir -p $out/bin
-
-          cat > $out/bin/random-wallpaper <<EOF
-          #!/usr/bin/env bash
-          find $out/share/wallpapers/3440x1440 -type f -name '*.jpeg' | shuf -n 1
-          EOF
-          chmod +x $out/bin/random-wallpaper
-
-          random_image=$(find $out/share/wallpapers/3440x1440 -type f -name '*.jpeg' | shuf -n 1)
-          echo $random_image > $out/share/wallpapers/random-image
+          cp -r $src/3440x1440/ $out/share/wallpapers/3440x1440/
         '';
-
-        meta = with pkgs.lib; {
-          description = "Wallpapers package with random wallpaper script";
-          license = licenses.mit;
-        };
       };
 
-      randomImage = pkgs.writeText "random-image-path" ''
-        ${builtins.readFile "${self.packages.${system}.wallpapers}/share/wallpapers/random-image"}
+      randomImage = pkgs.writeShellScriptBin "random-image" ''
+        find ${self.packages.${system}.wallpapers}/share/wallpapers/ -type f -name '*.jpeg' | shuf -n 1
       '';
     });
 
-    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
-
-    nixosModules.wallpapers = { config, lib, pkgs, ... }: {
-      options.wallpapers = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "Enable the wallpapers module";
-        };
-        package = lib.mkOption {
-          type = lib.types.package;
-          default = pkgs.wallpapers;
-          description = "The package that contains the wallpapers";
-        };
-      };
-
-      config = lib.mkIf config.wallpapers.enable {
-        environment.systemPackages = [ config.wallpapers.package ];
-        environment.etc."wallpapers".source = "${config.wallpapers.package}/share/wallpapers";
-      };
-    };
-
     defaultPackage = forAllSystems (system: self.packages.${system}.wallpapers);
 
-    apps = forAllSystems (system: {
-      randomImage = {
-        type = "app";
-        program = "${self.packages.${system}.randomImage}";
-      };
-    });
-
-    defaultApp = forAllSystems (system: self.apps.${system}.randomImage);
   };
 }
